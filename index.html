@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceBot Interview Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #4a6fa5;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .bot-container {
+            padding: 25px;
+        }
+        
+        .bot-icon {
+            width: 80px;
+            height: 80px;
+            background: #e8eaf6;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            color: #4a6fa5;
+        }
+        
+        .status {
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 24px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .questions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .questions h3 {
+            margin-bottom: 10px;
+            color: #4a6fa5;
+        }
+        
+        .questions ul {
+            padding-left: 20px;
+            color: #555;
+        }
+        
+        .questions li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #3a5a80;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .response {
+            background: #f0f4f8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            min-height: 100px;
+        }
+        
+        .response h3 {
+            margin-bottom: 10px;
+            color: #4a6fa5;
+        }
+        
+        .response-text {
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 500px) {
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .bot-container {
+                padding: 20px 15px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+        
+        .pulse {
+            animation: pulse-animation 1.5s infinite;
+        }
+        
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>VoiceBot Interview Assistant</h1>
+            <p>Ask me questions and I'll respond as the candidate would</p>
+        </div>
+        
+        <div class="bot-container">
+            <div class="bot-icon">🤖</div>
+            
+            <div class="status" id="status">Ready to start</div>
+            
+            <div class="questions">
+                <h3>Try asking:</h3>
+                <ul>
+                    <li>What should we know about your life story?</li>
+                    <li>What's your #1 superpower?</li>
+                    <li>What are the top 3 areas you'd like to grow in?</li>
+                    <li>What misconception do your coworkers have about you?</li>
+                    <li>How do you push your boundaries and limits?</li>
+                </ul>
+            </div>
+            
+            <div class="controls">
+                <button id="startBtn">
+                    <span>🎙️</span> Start Listening
+                </button>
+                <button id="stopBtn" disabled>
+                    <span>⏹️</span> Stop
+                </button>
+            </div>
+            
+            <div class="response">
+                <h3>Response:</h3>
+                <div class="response-text" id="responseText">Your answer will appear here...</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is a simulation for interview purposes. No actual data is being collected or stored.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const status = document.getElementById('status');
+            const responseText = document.getElementById('responseText');
+            
+            // Check if browser supports Web Speech API
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                status.textContent = 'Speech recognition not supported in this browser. Try Chrome or Edge.';
+                startBtn.disabled = true;
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            
+            const synthesis = window.speechSynthesis;
+            
+            // Predefined responses
+            const responses = {
+                'life story': "I'm a passionate developer who transitioned into AI after studying computer science. I've always been fascinated by how technology can solve real-world problems, which led me to specialize in machine learning and natural language processing.",
+                'superpower': "My #1 superpower is my ability to quickly learn and adapt to new technologies. I can dive into unfamiliar codebases or frameworks and become productive in a very short time, which has been valuable in fast-paced environments.",
+                'grow in': "First, I'd like to deepen my expertise in reinforcement learning. Second, I want to improve my project management skills to better lead AI initiatives. Third, I aim to enhance my ability to explain complex AI concepts to non-technical stakeholders.",
+                'misconception': "Some coworkers think I'm always serious because I'm focused at work, but outside of work I actually have a pretty good sense of humor and enjoy outdoor activities like hiking and photography.",
+                'boundaries': "I regularly take on projects that stretch my abilities beyond my comfort zone. I also contribute to open source projects to learn from other developers, and I set quarterly learning goals to systematically expand my skill set."
+            };
+            
+            // Alternative phrasing of questions
+            const questionVariations = {
+                'life story': ['life', 'story', 'background', 'tell me about yourself'],
+                'superpower': ['superpower', 'super power', 'strength', 'greatest strength'],
+                'grow in': ['grow', 'improve', 'development areas', 'areas of growth'],
+                'misconception': ['misconception', 'wrong about you', 'coworkers think', 'colleagues think'],
+                'boundaries': ['boundaries', 'limits', 'challenge yourself', 'comfort zone']
+            };
+            
+            startBtn.addEventListener('click', () => {
+                recognition.start();
+                status.textContent = 'Listening...';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                responseText.textContent = "Listening for your question...";
+            });
+            
+            stopBtn.addEventListener('click', () => {
+                recognition.stop();
+                status.textContent = 'Stopped listening';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            });
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                status.textContent = `Heard: "${transcript}"`;
+                
+                let responded = false;
+                
+                // Check which question was asked
+                for (const [key, variations] of Object.entries(questionVariations)) {
+                    for (const phrase of variations) {
+                        if (transcript.includes(phrase)) {
+                            respond(key, responses[key]);
+                            responded = true;
+                            break;
+                        }
+                    }
+                    if (responded) break;
+                }
+                
+                if (!responded) {
+                    const defaultResponse = "I'm not sure how to answer that. Could you ask one of the suggested questions?";
+                    responseText.textContent = defaultResponse;
+                    speak(defaultResponse);
+                }
+            };
+            
+            recognition.onerror = function(event) {
+                status.textContent = `Error: ${event.error}`;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+            
+            recognition.onend = function() {
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                status.textContent = 'Ready to listen again';
+            };
+            
+            function respond(key, text) {
+                responseText.textContent = text;
+                speak(text);
+            }
+            
+            function speak(text) {
+                if (synthesis.speaking) {
+                    synthesis.cancel();
+                }
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                
+                synthesis.speak(utterance);
+            }
+        });
+    </script>
+</body>
+</html>
